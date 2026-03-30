@@ -1,27 +1,28 @@
-FROM node:20-alpine AS base
+FROM node:20-alpine
 
 WORKDIR /app
 
-# Install dependencies
 COPY package.json yarn.lock* package-lock.json* ./
 RUN npm install --legacy-peer-deps
 
-# Copy source
 COPY . .
 
-# Build args for Next.js build-time env
-ARG NEXT_PUBLIC_MEDUSA_BACKEND_URL
-ARG NEXT_PUBLIC_BASE_URL
-ARG REVALIDATE_WINDOW
-
-ENV NEXT_PUBLIC_MEDUSA_BACKEND_URL=$NEXT_PUBLIC_MEDUSA_BACKEND_URL
-ENV NEXT_PUBLIC_BASE_URL=$NEXT_PUBLIC_BASE_URL
-ENV REVALIDATE_WINDOW=$REVALIDATE_WINDOW
 ENV NODE_OPTIONS=--max-old-space-size=1536
 
-# Build
-RUN npm run build
-
+# Build-time env vars must be set via Coolify
+# Next.js build needs API access, so we build at runtime on first start
 EXPOSE 8000
 
-CMD ["npm", "start"]
+# Build and start script
+COPY <<'EOF' /app/entrypoint.sh
+#!/bin/sh
+set -e
+echo "Building Next.js storefront..."
+npm run build
+echo "Starting storefront..."
+npm start
+EOF
+
+RUN chmod +x /app/entrypoint.sh
+
+CMD ["/app/entrypoint.sh"]
