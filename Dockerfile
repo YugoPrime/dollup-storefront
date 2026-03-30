@@ -9,19 +9,22 @@ COPY . .
 
 ENV NODE_OPTIONS=--max-old-space-size=1536
 
-# Build-time env vars must be set via Coolify
-# Next.js build needs API access, so we build at runtime on first start
 EXPOSE 8000
 
-# Build and start script
-COPY <<'EOF' /app/entrypoint.sh
+# Entrypoint builds at runtime so it can reach the backend via Docker network
+COPY <<'ENTRY' /app/entrypoint.sh
 #!/bin/sh
 set -e
-echo "Building Next.js storefront..."
+
+# Use internal Docker URL for server-side build fetches
+export MEDUSA_BACKEND_URL="${MEDUSA_BACKEND_URL:-http://localhost:9000}"
+echo "Building with backend: $MEDUSA_BACKEND_URL"
+
 npm run build
+
 echo "Starting storefront..."
-npm start
-EOF
+exec npm start
+ENTRY
 
 RUN chmod +x /app/entrypoint.sh
 
