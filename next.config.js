@@ -42,6 +42,14 @@ const nextConfig = {
         protocol: "https",
         hostname: "medusa-server-testing.s3.us-east-1.amazonaws.com",
       },
+      {
+        protocol: "https",
+        hostname: "cdn.dollupboutique.com",
+      },
+      {
+        protocol: "https",
+        hostname: "pub-da0a69100a054c009c778c5968b82070.r2.dev",
+      },
       ...(S3_HOSTNAME && S3_PATHNAME
         ? [
             {
