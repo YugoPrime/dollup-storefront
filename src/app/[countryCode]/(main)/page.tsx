@@ -6,9 +6,9 @@ import { listCollections } from "@lib/data/collections"
 import { getRegion } from "@lib/data/regions"
 
 export const metadata: Metadata = {
-  title: "Medusa Next.js Starter Template",
+  title: "DollUp Boutique — Mode Femme | Île Maurice",
   description:
-    "A performant frontend ecommerce starter template with Next.js 15 and Medusa.",
+    "Découvrez les dernières tendances mode femme chez DollUp Boutique. Livraison à l'Île Maurice.",
 }
 
 export default async function Home(props: {
