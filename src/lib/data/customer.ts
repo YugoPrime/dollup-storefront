@@ -33,7 +33,7 @@ export const retrieveCustomer =
       .fetch<{ customer: HttpTypes.StoreCustomer }>(`/store/customers/me`, {
         method: "GET",
         query: {
-          fields: "*orders",
+          fields: "id,first_name,last_name,email,has_account",
         },
         headers,
         next,

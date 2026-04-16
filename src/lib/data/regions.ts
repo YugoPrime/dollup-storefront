@@ -3,21 +3,39 @@
 import { sdk } from "@lib/config"
 import medusaError from "@lib/util/medusa-error"
 import { HttpTypes } from "@medusajs/types"
+import { unstable_cache } from "next/cache"
 import { getCacheOptions } from "./cookies"
 
-export const listRegions = async () => {
-  const next = {
-    ...(await getCacheOptions("regions")),
-  }
-
-  return sdk.client
+const _fetchRegions = async () =>
+  sdk.client
     .fetch<{ regions: HttpTypes.StoreRegion[] }>(`/store/regions`, {
       method: "GET",
-      next,
       cache: "force-cache",
     })
     .then(({ regions }) => regions)
     .catch(medusaError)
+
+const getCachedRegions = unstable_cache(_fetchRegions, ["store-regions"], {
+  revalidate: 3600,
+  tags: ["regions"],
+})
+
+export const listRegions = async () => {
+  try {
+    const next = await getCacheOptions("regions")
+    if (Object.keys(next).length > 0) {
+      // Per-user cache tag present (logged-in user with cache id) — bypass shared cache
+      return sdk.client
+        .fetch<{ regions: HttpTypes.StoreRegion[] }>(`/store/regions`, {
+          method: "GET",
+          next,
+          cache: "force-cache",
+        })
+        .then(({ regions }) => regions)
+        .catch(medusaError)
+    }
+  } catch {}
+  return getCachedRegions()
 }
 
 export const retrieveRegion = async (id: string) => {
